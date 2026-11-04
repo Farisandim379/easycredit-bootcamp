@@ -11,14 +11,14 @@
 }
 
 <div class="card panel">
-    <div class="card-header panel-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div class="card-header panel-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div>
             <h2>Daftar Pengajuan Kredit</h2>
-            <p class="mb-0" style="opacity: .75; font-size: 13px;">Kelola dan setujui permohonan pinjaman nasabah (Oracle Stored Procedure Day 6).</p>
+            <p class="mb-0" style="opacity: .75; font-size: 13px;">Kelola dan setujui permohonan pinjaman nasabah.</p>
         </div>
-        <div class="d-flex gap-2 align-items-center flex-wrap">
-            <span class="chip chip-orange">Menunggu: @Model.Items.Count(i => i.CanApprove)</span>
-            <a class="btn btn-primary" asp-action="Create">+ Ajukan Pinjaman</a>
+        <div class="d-inline-flex align-items-center gap-2 flex-nowrap ms-md-auto">
+            <span class="chip chip-orange text-nowrap" style="height: 38px; padding: 0 14px; font-size: 12px;">Menunggu: @Model.Items.Count(i => i.CanApprove)</span>
+            <a class="btn btn-primary text-nowrap" asp-action="Create" style="height: 38px; padding: 0 14px; font-size: 12px; display: inline-flex; align-items: center;">+ Ajukan Pinjaman</a>
         </div>
     </div>
 
@@ -67,13 +67,20 @@
                             <td class="num">
                                 @if (item.CanApprove)
                                 {
-                                    <button type="button"
-                                            class="btn btn-primary btn-sm js-approve"
-                                            data-id="@item.ApplicationId"
-                                            data-name="@item.CustomerName"
-                                            data-amount="Rp @item.Amount.ToString("N0")">
-                                        Setujui
-                                    </button>
+                                    @if (ViewBag.IsAdmin == true)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-primary btn-sm js-approve"
+                                                data-id="@item.ApplicationId"
+                                                data-name="@item.CustomerName"
+                                                data-amount="Rp @item.Amount.ToString("N0")">
+                                            Setujui
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span style="opacity: .75; font-size: 12px; font-weight: 700;">Menunggu Admin</span>
+                                    }
                                 }
                                 else
                                 {

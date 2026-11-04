@@ -34,6 +34,7 @@ public class CreditApplicationsController : ControllerBase
     }
 
     [HttpPost("{id:int}/approve")]
+    [Authorize(Roles = "ADMIN,Admin")]
     public async Task<IActionResult> Approve(int id, [FromBody] ReqApproveApplicationDto dto)
     {
         var message = await _service.ApproveAsync(id, dto.Approver);

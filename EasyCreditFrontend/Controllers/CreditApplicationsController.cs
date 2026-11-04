@@ -64,6 +64,15 @@ public class CreditApplicationsController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Approve(int id, string? approver)
     {
+        if (!IsAdmin)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                status = false,
+                message = "Akses ditolak: STAFF tidak memiliki izin untuk menyetujui pengajuan kredit (403 Forbidden)."
+            });
+        }
+
         var approverName = string.IsNullOrWhiteSpace(approver) ? UserName : approver.Trim();
         var payload = new { approver = approverName };
         var response = await _apiClient.PostAsync<object>($"/api/credit-applications/{id}/approve", payload);
