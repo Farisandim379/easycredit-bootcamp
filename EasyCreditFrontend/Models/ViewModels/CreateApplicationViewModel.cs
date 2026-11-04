@@ -9,7 +9,7 @@ public class CreateApplicationViewModel
     public int CustomerId { get; set; }
 
     [Required(ErrorMessage = "Jumlah pinjaman wajib diisi")]
-    [Range(1000000, 500000000, ErrorMessage = "Pinjaman antara Rp 1.000.000 - Rp 500.000.000")]
+    [Range(1000000, 50000000, ErrorMessage = "Pinjaman antara Rp 1.000.000 - Rp 50.000.000")]
     [Display(Name = "Jumlah Pinjaman (Rp)")]
     public decimal Amount { get; set; } = 5000000;
 

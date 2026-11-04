@@ -8,7 +8,7 @@ public class ReqCreateApplicationDto
     public int CustomerId { get; set; }
 
     [Required]
-    [Range(1000000, 500000000, ErrorMessage = "Jumlah pinjaman harus antara Rp 1.000.000 sampai Rp 500.000.000")]
+    [Range(1000000, 50000000, ErrorMessage = "Jumlah pinjaman harus antara Rp 1.000.000 sampai Rp 50.000.000")]
     public decimal Amount { get; set; }
 
     [Required]

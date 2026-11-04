@@ -90,14 +90,14 @@ builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<OracleConnectionFactory>();
-// builder.Services.AddScoped<ICustomerRepository, OracleCustomerRepository>();
+builder.Services.AddScoped<ICustomerRepository, OracleCustomerRepository>();
 builder.Services.AddScoped<OracleTransactionDemo>();
 builder.Services.AddScoped<ICustomerSpRepository, OracleCustomerSpRepository>();
 builder.Services.AddScoped<ICustomerSpService, CustomerSpService>();
 builder.Services.AddScoped<ICreditApplicationSpRepository, OracleCreditApplicationSpRepository>();
 builder.Services.AddScoped<ICreditApplicationSpService, CreditApplicationSpService>();
 builder.Services.AddScoped<IUserRepository, EfUserRepository>();
-builder.Services.AddScoped<ICustomerRepository, EfCustomerRepository>();
+// builder.Services.AddScoped<ICustomerRepository, EfCustomerRepository>();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
         options.UseNpgsql(postgresConnectionString);

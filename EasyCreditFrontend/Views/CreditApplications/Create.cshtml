@@ -33,10 +33,10 @@
             <label asp-for="Amount" class="form-label"></label>
             <div class="input-group">
                 <span class="input-group-text">Rp</span>
-                <input asp-for="Amount" type="number" step="500000" class="form-control" placeholder="5000000" />
+                <input asp-for="Amount" type="number" step="500000" min="1000000" max="50000000" class="form-control" placeholder="5000000" />
             </div>
             <span asp-validation-for="Amount" class="text-danger text-sm font-bold"></span>
-            <small class="d-block mt-1" style="font-size: 12px; opacity: .75;">Minimal Rp 1.000.000, maksimal Rp 500.000.000</small>
+            <small class="d-block mt-1" style="font-size: 12px; opacity: .75;">Minimal Rp 1.000.000, maksimal Rp 50.000.000</small>
         </div>
 
         <div class="mb-4">

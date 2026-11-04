@@ -113,7 +113,7 @@ public sealed class OracleCustomerRepository : ICustomerRepository
         await using var conn = _factory.Create();
 
         return await conn.QueryAsync<Customer>(
-            $"SELECT {SelectColumns} FROM {Table} WHERE ID IN :Ids ORDER BY CUSTOMERS_ID",
+            $"SELECT {SelectColumns} FROM {Table} WHERE CUSTOMERS_ID IN :Ids ORDER BY CUSTOMERS_ID",
             new { Ids = ids });
     }
 
