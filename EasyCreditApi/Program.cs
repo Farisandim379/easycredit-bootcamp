@@ -35,7 +35,15 @@ builder.Host.UseSerilog((ctx, services, cfg) => cfg
     .ReadFrom.Services(services));
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
+    {
+        Title = "EasyCredit API",
+        Version = "v1",
+        Description = "EasyCredit Sistem Pengajuan Kredit Online — ASP.NET Core Web API"
+    });
+});
 
 /// JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
@@ -126,6 +134,9 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Otomatis pastikan tabel dan seed akun demo jika database siap
+await DatabaseSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

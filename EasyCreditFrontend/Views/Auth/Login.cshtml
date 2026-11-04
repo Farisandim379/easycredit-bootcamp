@@ -21,18 +21,32 @@
 
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" placeholder="admin@mail.com" autocomplete="username" />
+                <input asp-for="Email" id="loginEmail" class="form-control" placeholder="admin@easycredit.test" autocomplete="username" />
                 <span asp-validation-for="Email" class="text-danger font-bold text-sm"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                <input asp-for="Password" id="loginPassword" class="form-control" autocomplete="current-password" />
                 <span asp-validation-for="Password" class="text-danger font-bold text-sm"></span>
             </div>
 
             <button type="submit" class="btn btn-primary w-100 mt-2">Masuk</button>
         </form>
+
+        <div class="mt-4 pt-3 border-top" style="border-color: var(--ink) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;">Akun Demo Cepat:</strong>
+            </div>
+            <div class="d-flex flex-column gap-2" style="font-size: 12px;">
+                <button type="button" class="btn btn-sm btn-action text-start p-2 js-fill-demo" data-email="admin@easycredit.test" data-role="admin123">
+                    <strong>ADMIN:</strong> admin@easycredit.test <span class="badge bg-dark ms-1">admin123</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-action text-start p-2 js-fill-demo" data-email="staff@easycredit.test" data-role="staff123">
+                    <strong>STAFF:</strong> staff@easycredit.test <span class="badge bg-secondary ms-1">staff123</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <div class="footer text-center mt-3" style="border:none !important;">
@@ -42,4 +56,14 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(function () {
+            $('.js-fill-demo').on('click', function () {
+                var email = $(this).data('email');
+                var pass = $(this).data('role');
+                $('#loginEmail').val(email);
+                $('#loginPassword').val(pass);
+            });
+        });
+    </script>
 }
