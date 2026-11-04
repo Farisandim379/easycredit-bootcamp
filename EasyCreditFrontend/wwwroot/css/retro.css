@@ -377,6 +377,9 @@ h3 {
   letter-spacing: .04em !important;
   text-decoration: none !important;
   cursor: pointer;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
   box-shadow: var(--shadow-sm) !important;
   transition: transform .08s, box-shadow .08s !important;
 }
@@ -712,13 +715,28 @@ body.is-auth .page-content.auth-page {
 }
 
 .toast-stack {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  position: fixed !important;
+  top: auto !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  left: auto !important;
+  width: auto !important;
+  max-width: 360px !important;
+  height: auto !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  pointer-events: none !important;
+}
+
+.toast-stack .app-toast {
+  pointer-events: auto !important;
+}
+
+.modal:not(.show) {
+  display: none !important;
+  pointer-events: none !important;
 }
 
 .app-toast {
