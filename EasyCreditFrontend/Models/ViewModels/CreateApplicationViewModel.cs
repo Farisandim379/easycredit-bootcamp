@@ -14,7 +14,7 @@ public class CreateApplicationViewModel
     public decimal Amount { get; set; } = 5000000;
 
     [Required(ErrorMessage = "Tenor wajib dipilih")]
-    [Range(1, 120, ErrorMessage = "Tenor antara 1 - 120 bulan")]
-    [Display(Name = "Tenor (Bulan)")]
+    [AllowedValues(6, 12, 24, 36, ErrorMessage = "Tenor harus 6, 12, 24, atau 36 bulan")]
+    [Display(Name = "Tenor Pinjaman")]
     public int TenorMonths { get; set; } = 12;
 }

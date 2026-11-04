@@ -10,11 +10,11 @@
     };
 }
 
-<div class="card panel">
+<div class="card panel mb-4">
     <div class="card-header panel-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div>
             <h2>Daftar Pengajuan Kredit</h2>
-            <p class="mb-0" style="opacity: .75; font-size: 13px;">Kelola dan setujui permohonan pinjaman nasabah.</p>
+            <p class="mb-0" style="opacity: .75; font-size: 13px;">Kelola, pantau, dan verifikasi permohonan pinjaman nasabah.</p>
         </div>
         <div class="d-inline-flex align-items-center gap-2 flex-nowrap ms-md-auto">
             <span class="chip chip-orange text-nowrap" style="height: 38px; padding: 0 14px; font-size: 12px;">Menunggu: @Model.Items.Count(i => i.CanApprove)</span>
@@ -22,28 +22,52 @@
         </div>
     </div>
 
+    <!-- Filter & Search Bar -->
+    <div class="p-3" style="background: var(--paper); border-bottom: 2px solid var(--ink);">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-12 col-md-5">
+                <input type="text" name="keyword" value="@Model.Keyword" class="form-control" placeholder="Cari nama nasabah atau ID pengajuan..." />
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="status" class="form-select form-control">
+                    <option value="">-- Semua Status --</option>
+                    <option value="PENDING" selected="@(Model.Status == "PENDING")">PENDING</option>
+                    <option value="APPROVED" selected="@(Model.Status == "APPROVED")">APPROVED</option>
+                    <option value="REJECTED" selected="@(Model.Status == "REJECTED")">REJECTED</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-sm" style="flex: 1;">Filter</button>
+                @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.Status))
+                {
+                    <a asp-action="Index" class="btn btn-sm" style="background: var(--cream);">Reset</a>
+                }
+            </div>
+        </form>
+    </div>
+
     @if (!Model.Items.Any())
     {
         <div class="p-5 text-center">
             <div style="font-size: 32px; margin-bottom: 8px;">▤</div>
             <h4 class="page-title" style="font-size: 20px;">Belum ada pengajuan</h4>
-            <p style="opacity: .75;">Tidak ada data pengajuan kredit yang sesuai filter saat ini.</p>
+            <p style="opacity: .75;">Tidak ada data pengajuan kredit yang sesuai kriteria pencarian.</p>
         </div>
     }
     else
     {
         <div class="table-wrap">
-            <table class="table">
+            <table class="table mb-0">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style="width: 70px;">ID</th>
                         <th>Nasabah</th>
                         <th class="num">Jumlah Pinjaman</th>
                         <th>Tenor</th>
                         <th>Status</th>
                         <th>Disetujui Oleh</th>
-                        <th>Waktu Persetujuan</th>
-                        <th class="num">Aksi</th>
+                        <th>Waktu Proses</th>
+                        <th class="num" style="min-width: 170px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,27 +89,38 @@
                             <td style="opacity: .8;">@(item.ApprovedBy ?? "-")</td>
                             <td style="opacity: .8;">@(item.ApprovedAt?.ToString("dd MMM yyyy HH:mm") ?? "-")</td>
                             <td class="num">
-                                @if (item.CanApprove)
-                                {
-                                    @if (ViewBag.IsAdmin == true)
+                                <div class="d-inline-flex gap-1 align-items-center">
+                                    <a asp-action="Detail" asp-route-id="@item.ApplicationId" class="btn btn-sm" style="padding: 4px 8px; font-size: 11px;">
+                                        Detail
+                                    </a>
+
+                                    @if (item.CanApprove)
                                     {
-                                        <button type="button"
-                                                class="btn btn-primary btn-sm js-approve"
-                                                data-id="@item.ApplicationId"
-                                                data-name="@item.CustomerName"
-                                                data-amount="Rp @item.Amount.ToString("N0")">
-                                            Setujui
-                                        </button>
+                                        @if (ViewBag.IsAdmin == true)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm js-approve"
+                                                    style="padding: 4px 8px; font-size: 11px;"
+                                                    data-id="@item.ApplicationId"
+                                                    data-name="@item.CustomerName"
+                                                    data-amount="Rp @item.Amount.ToString("N0")">
+                                                Setujui
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-danger btn-sm js-reject"
+                                                    style="padding: 4px 8px; font-size: 11px;"
+                                                    data-id="@item.ApplicationId"
+                                                    data-name="@item.CustomerName"
+                                                    data-amount="Rp @item.Amount.ToString("N0")">
+                                                Tolak
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span style="opacity: .75; font-size: 11px; font-weight: 700;">Menunggu Admin</span>
+                                        }
                                     }
-                                    else
-                                    {
-                                        <span style="opacity: .75; font-size: 12px; font-weight: 700;">Menunggu Admin</span>
-                                    }
-                                }
-                                else
-                                {
-                                    <span style="opacity: .7; font-size: 12px; font-weight: 700;">Selesai</span>
-                                }
+                                </div>
                             </td>
                         </tr>
                     }
@@ -102,7 +137,9 @@
                 <a class="btn btn-sm @(!Model.HasPreviousPage ? "disabled" : "")"
                    asp-action="Index"
                    asp-route-page="@(Model.Page - 1)"
-                   asp-route-size="@Model.Size">
+                   asp-route-size="@Model.Size"
+                   asp-route-keyword="@Model.Keyword"
+                   asp-route-status="@Model.Status">
                     Sebelumnya
                 </a>
 
@@ -111,7 +148,9 @@
                 <a class="btn btn-sm @(!Model.HasNextPage ? "disabled" : "")"
                    asp-action="Index"
                    asp-route-page="@(Model.Page + 1)"
-                   asp-route-size="@Model.Size">
+                   asp-route-size="@Model.Size"
+                   asp-route-keyword="@Model.Keyword"
+                   asp-route-status="@Model.Status">
                     Berikutnya
                 </a>
             </div>
@@ -122,6 +161,7 @@
 @section Scripts {
     <script>
         $(function () {
+            // Approve action
             $('.js-approve').on('click', async function () {
                 var btn = $(this);
                 var id = btn.data('id');
@@ -150,17 +190,59 @@
                     success: function (res) {
                         if (res.status) {
                             EC.toast('success', res.message, 'Disetujui');
-                            setTimeout(function () {
-                                location.reload();
-                            }, 800);
+                            setTimeout(function () { location.reload(); }, 800);
                         } else {
                             btn.prop('disabled', false);
                             EC.toast('error', res.message, 'Gagal');
                         }
                     },
-                    error: function () {
+                    error: function (xhr) {
                         btn.prop('disabled', false);
-                        EC.toast('error', 'Terjadi kesalahan saat memproses approval.', 'Gagal');
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Terjadi kesalahan approval.';
+                        EC.toast('error', msg, 'Gagal');
+                    }
+                });
+            });
+
+            // Reject action
+            $('.js-reject').on('click', async function () {
+                var btn = $(this);
+                var id = btn.data('id');
+                var name = btn.data('name');
+                var amount = btn.data('amount');
+
+                var ok = await EC.confirm({
+                    title: 'Tolak Pengajuan Kredit?',
+                    message: 'Anda akan menolak pengajuan pinjaman ' + amount + ' untuk ' + name + '.',
+                    confirmText: 'Ya, Tolak',
+                    danger: true
+                });
+
+                if (!ok) return;
+
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("Reject", "CreditApplications")',
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        approver: '@ViewBag.UserName',
+                        __RequestVerificationToken: EC.token()
+                    },
+                    success: function (res) {
+                        if (res.status) {
+                            EC.toast('success', res.message, 'Ditolak');
+                            setTimeout(function () { location.reload(); }, 800);
+                        } else {
+                            btn.prop('disabled', false);
+                            EC.toast('error', res.message, 'Gagal');
+                        }
+                    },
+                    error: function (xhr) {
+                        btn.prop('disabled', false);
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Terjadi kesalahan tolak pengajuan.';
+                        EC.toast('error', msg, 'Gagal');
                     }
                 });
             });

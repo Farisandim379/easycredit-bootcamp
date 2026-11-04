@@ -17,16 +17,21 @@ public class ExceptionMiddleware
     {
         try
         {
-            await _next(context);  // Call next middleware
+            await _next(context);
         }
         catch (NotFoundException ex)
         {
-            context.Response.StatusCode = 404;
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
             await context.Response.WriteAsJsonAsync(ApiResponse<object>.Fail(ex.Message));
         }
         catch (ValidationException ex)
         {
-            context.Response.StatusCode = 400;
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Fail(ex.Message));
+        }
+        catch (BadHttpRequestException ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteAsJsonAsync(ApiResponse<object>.Fail(ex.Message));
         }
         catch (ConflictException ex)
@@ -34,12 +39,16 @@ public class ExceptionMiddleware
             context.Response.StatusCode = StatusCodes.Status409Conflict;
             await context.Response.WriteAsJsonAsync(ApiResponse<object>.Fail(ex.Message));
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Fail(ex.Message));
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
-            context.Response.StatusCode = 500;
+            _logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsJsonAsync(ApiResponse<object>.Fail("Internal server error"));
-            // NEVER expose ex.Message in production!
         }
     }
 
@@ -48,7 +57,6 @@ public class ExceptionMiddleware
         public NotFoundException(string message) : base(message) { }
     }
 
-    // Our own validation exception (not System.ComponentModel.DataAnnotations.ValidationException)
     public class ValidationException : Exception
     {
         public ValidationException(string message) : base(message) { }
@@ -60,7 +68,6 @@ public class ExceptionMiddleware
     }
 }
 
-// Extension method for clean registration
 public static class ExceptionMiddlewareExtensions
 {
     public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder app)

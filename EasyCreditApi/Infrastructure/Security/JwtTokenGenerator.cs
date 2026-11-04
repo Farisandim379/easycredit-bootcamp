@@ -23,10 +23,14 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
         var claims = new[]
         {
-           new Claim(ClaimTypes.NameIdentifier, userID.ToString()),
-           new Claim(ClaimTypes.Name, name),
+           new Claim(JwtRegisteredClaimNames.Sub, userID.ToString()),
+           new Claim("userId", userID.ToString()),
+           new Claim("name", name),
+           new Claim("role", role),
            new Claim(ClaimTypes.Role, role),
-           new Claim("iat", DateTimeOffset.Now.ToUnixTimeSeconds().ToString())
+           new Claim(ClaimTypes.Name, name),
+           new Claim(ClaimTypes.NameIdentifier, userID.ToString()),
+           new Claim("iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
 
         var credentials = new SigningCredentials(
@@ -53,6 +57,8 @@ public class JwtSettings
     public string Audience { get; set; } = string.Empty;
     public int ExpiryMinutes { get; set; } = 60;
 
-    public SymmetricSecurityKey GetSigningKey() =>
-        new(Encoding.UTF8.GetBytes(Key));
+    public SymmetricSecurityKey GetSigningKey()
+    {
+        return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key));
+    }
 }

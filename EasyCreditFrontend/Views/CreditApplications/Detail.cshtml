@@ -1,0 +1,267 @@
+@model ApplicationDetailViewModel
+@{
+    ViewData["Title"] = $"Detail Pengajuan #{Model.ApplicationId}";
+
+    string StatusBadge(string status) => status switch
+    {
+        "APPROVED" => "badge",
+        "REJECTED" => "badge badge-rejected",
+        _ => "badge badge-pending"
+    };
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="crumbs mb-1">
+            <a asp-controller="Home" asp-action="Index">Dashboard</a>
+            <span>/</span>
+            <a asp-action="Index">Pengajuan</a>
+            <span>/</span>
+            <span>Detail #@Model.ApplicationId</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="mb-0">Pengajuan #@Model.ApplicationId</h2>
+            <span class="@StatusBadge(Model.Status)" style="font-size: 13px; padding: 4px 10px;">@Model.Status</span>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn">Kembali ke Daftar</a>
+
+        @if (Model.CanApprove && ViewBag.IsAdmin == true)
+        {
+            <button type="button" class="btn btn-primary js-detail-approve"
+                    data-id="@Model.ApplicationId"
+                    data-name="@Model.CustomerName"
+                    data-amount="Rp @Model.Amount.ToString("N0")">
+                ✓ Setujui
+            </button>
+            <button type="button" class="btn btn-danger js-detail-reject"
+                    data-id="@Model.ApplicationId"
+                    data-name="@Model.CustomerName"
+                    data-amount="Rp @Model.Amount.ToString("N0")">
+                ✕ Tolak
+            </button>
+        }
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Customer Details Card (PostgreSQL) -->
+    <div class="col-lg-6">
+        <div class="card panel p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3" style="border-bottom: 2px solid var(--ink); padding-bottom: 8px;">
+                <h3 class="mb-0" style="font-size: 18px;">Informasi Nasabah</h3>
+                <span class="chip chip-sm" style="font-size: 10px;">PostgreSQL EF Core</span>
+            </div>
+
+            <table class="table table-borderless mb-0" style="font-size: 14px;">
+                <tbody>
+                    <tr>
+                        <td style="width: 140px; opacity: .75; font-weight: 700;">ID Nasabah</td>
+                        <td class="font-bold">#@Model.CustomerId</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Nama Lengkap</td>
+                        <td class="font-bold">@Model.CustomerName</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">NIK</td>
+                        <td class="font-mono">@(Model.CustomerNik ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Nomor HP</td>
+                        <td>@(Model.CustomerPhone ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Email</td>
+                        <td>@(Model.CustomerEmail ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Alamat</td>
+                        <td>@(Model.CustomerAddress ?? "-")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Loan Details Card (Oracle) -->
+    <div class="col-lg-6">
+        <div class="card panel p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3" style="border-bottom: 2px solid var(--ink); padding-bottom: 8px;">
+                <h3 class="mb-0" style="font-size: 18px;">Rincian Pinjaman</h3>
+                <span class="chip chip-sm" style="font-size: 10px;">Oracle Transaksi</span>
+            </div>
+
+            <table class="table table-borderless mb-0" style="font-size: 14px;">
+                <tbody>
+                    <tr>
+                        <td style="width: 150px; opacity: .75; font-weight: 700;">Nominal Pinjaman</td>
+                        <td style="font-size: 18px; font-weight: 900; color: var(--ink);">Rp @Model.Amount.ToString("N0")</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Tenor Pinjaman</td>
+                        <td class="font-bold">@Model.TenorMonths Bulan</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Tingkat Bunga</td>
+                        <td>@(Model.InterestRate?.ToString() ?? "10")% Flat / Tahun</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Credit Score</td>
+                        <td><span class="chip chip-sm" style="font-size: 11px;">@(Model.CreditScore ?? 700) (Good)</span></td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Tanggal Pengajuan</td>
+                        <td>@Model.ApplicationDate.ToString("dd MMMM yyyy HH:mm")</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Diproses Oleh</td>
+                        <td>@(Model.ApprovedBy ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <td style="opacity: .75; font-weight: 700;">Waktu Proses</td>
+                        <td>@(Model.ApprovedAt?.ToString("dd MMMM yyyy HH:mm") ?? "-")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Installment Schedule Table (TRN_CREDIT_INSTALLMENT) -->
+<div class="card panel">
+    <div class="card-header panel-header d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="mb-0" style="font-size: 18px;">Jadwal Cicilan (TRN_CREDIT_INSTALLMENT)</h3>
+            <p class="mb-0" style="opacity: .75; font-size: 12px;">Daftar angsuran bulanan yang tersimpan di Oracle Database.</p>
+        </div>
+        <span class="chip chip-orange" style="font-size: 12px;">@Model.Installments.Count Angsuran</span>
+    </div>
+
+    @if (!Model.Installments.Any())
+    {
+        <div class="p-4 text-center">
+            <p class="mb-0" style="opacity: .75;">Belum ada baris cicilan tersimpan.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Cicilan</th>
+                        <th>Tanggal Jatuh Tempo</th>
+                        <th class="num">Jumlah Angsuran</th>
+                        <th class="num">Status Angsuran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var inst in Model.Installments)
+                    {
+                        <tr>
+                            <td class="font-bold">Ke-@inst.InstallmentNo</td>
+                            <td>@inst.DueDate.ToString("dd MMMM yyyy")</td>
+                            <td class="num font-bold">Rp @inst.InstallmentAmount.ToString("N0")</td>
+                            <td class="num">
+                                <span class="badge @(inst.Status == "PAID" ? "" : "badge-pending")">@inst.Status</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('.js-detail-approve').on('click', async function () {
+                var btn = $(this);
+                var id = btn.data('id');
+                var name = btn.data('name');
+                var amount = btn.data('amount');
+
+                var ok = await EC.confirm({
+                    title: 'Setujui Pengajuan Kredit?',
+                    message: 'Anda akan menyetujui pinjaman ' + amount + ' untuk ' + name + '.',
+                    confirmText: 'Ya, Setujui',
+                    danger: false
+                });
+
+                if (!ok) return;
+
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("Approve", "CreditApplications")',
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        approver: '@ViewBag.UserName',
+                        __RequestVerificationToken: EC.token()
+                    },
+                    success: function (res) {
+                        if (res.status) {
+                            EC.toast('success', res.message, 'Disetujui');
+                            setTimeout(function () { location.reload(); }, 800);
+                        } else {
+                            btn.prop('disabled', false);
+                            EC.toast('error', res.message, 'Gagal');
+                        }
+                    },
+                    error: function (xhr) {
+                        btn.prop('disabled', false);
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.';
+                        EC.toast('error', msg, 'Gagal');
+                    }
+                });
+            });
+
+            $('.js-detail-reject').on('click', async function () {
+                var btn = $(this);
+                var id = btn.data('id');
+                var name = btn.data('name');
+                var amount = btn.data('amount');
+
+                var ok = await EC.confirm({
+                    title: 'Tolak Pengajuan Kredit?',
+                    message: 'Anda akan menolak pengajuan pinjaman ' + amount + ' untuk ' + name + '.',
+                    confirmText: 'Ya, Tolak',
+                    danger: true
+                });
+
+                if (!ok) return;
+
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("Reject", "CreditApplications")',
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        approver: '@ViewBag.UserName',
+                        __RequestVerificationToken: EC.token()
+                    },
+                    success: function (res) {
+                        if (res.status) {
+                            EC.toast('success', res.message, 'Ditolak');
+                            setTimeout(function () { location.reload(); }, 800);
+                        } else {
+                            btn.prop('disabled', false);
+                            EC.toast('error', res.message, 'Gagal');
+                        }
+                    },
+                    error: function (xhr) {
+                        btn.prop('disabled', false);
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.';
+                        EC.toast('error', msg, 'Gagal');
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -12,54 +12,207 @@
         <span>Ajukan Pinjaman</span>
     </div>
     <h2>Buat Pengajuan Pinjaman</h2>
-    <p class="mb-0" style="opacity: .75; font-size: 13px;">Pilih nasabah dan tentukan nominal serta tenor pinjaman yang diajukan.</p>
+    <p class="mb-0" style="opacity: .75; font-size: 13px;">Pilih nasabah, tentukan nominal serta tenor, dan lihat simulasi cicilan sebelum menyimpan.</p>
 </div>
 
-<div class="card panel p-4" style="max-width: 680px;">
-    <form asp-action="Create" method="post">
-        @Html.AntiForgeryToken()
+<div class="row g-4">
+    <!-- Form Card -->
+    <div class="col-lg-6">
+        <div class="card panel p-4 h-100">
+            <h3 class="mb-3" style="font-size: 18px; border-bottom: 2px solid var(--ink); padding-bottom: 8px;">Form Pengajuan</h3>
 
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+            <form asp-action="Create" method="post" id="formCreateApp">
+                @Html.AntiForgeryToken()
 
-        <div class="mb-3">
-            <label asp-for="CustomerId" class="form-label"></label>
-            <select asp-for="CustomerId" asp-items="@ViewBag.CustomerList" class="form-select form-control">
-                <option value="">-- Pilih Nasabah --</option>
-            </select>
-            <span asp-validation-for="CustomerId" class="text-danger text-sm font-bold"></span>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="CustomerId" class="form-label font-bold"></label>
+                    <select asp-for="CustomerId" asp-items="@ViewBag.CustomerList" class="form-select form-control" id="selectCustomer">
+                        <option value="">-- Pilih Nasabah --</option>
+                    </select>
+                    <span asp-validation-for="CustomerId" class="text-danger text-sm font-bold"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Amount" class="form-label font-bold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text">Rp</span>
+                        <input asp-for="Amount" id="inputAmount" type="number" step="500000" min="1000000" max="50000000" class="form-control" placeholder="5000000" />
+                    </div>
+                    <span asp-validation-for="Amount" class="text-danger text-sm font-bold"></span>
+                    <small class="d-block mt-1" style="font-size: 12px; opacity: .75;">Batas pinjaman: Rp 1.000.000 s/d Rp 50.000.000</small>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="TenorMonths" class="form-label font-bold"></label>
+                    <div class="d-flex gap-2">
+                        <select asp-for="TenorMonths" id="selectTenor" class="form-select form-control">
+                            <option value="6">6 Bulan</option>
+                            <option value="12" selected>12 Bulan (1 Tahun)</option>
+                            <option value="24">24 Bulan (2 Tahun)</option>
+                            <option value="36">36 Bulan (3 Tahun)</option>
+                        </select>
+                        <button type="button" id="btnCalculate" class="btn text-nowrap" style="background: var(--paper); border: 2px solid var(--ink);">
+                            ⚙ Hitung
+                        </button>
+                    </div>
+                    <span asp-validation-for="TenorMonths" class="text-danger text-sm font-bold"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center gap-2 pt-3" style="border-top: 2px solid var(--ink);">
+                    <a class="btn" asp-action="Index">Batal</a>
+                    <button type="submit" id="btnSubmit" class="btn btn-primary">
+                        Ajukan Pinjaman
+                    </button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <div class="mb-3">
-            <label asp-for="Amount" class="form-label"></label>
-            <div class="input-group">
-                <span class="input-group-text">Rp</span>
-                <input asp-for="Amount" type="number" step="500000" min="1000000" max="50000000" class="form-control" placeholder="5000000" />
+    <!-- Preview Cicilan Card -->
+    <div class="col-lg-6">
+        <div class="card panel p-4 h-100" id="previewContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3" style="border-bottom: 2px solid var(--ink); padding-bottom: 8px;">
+                <h3 class="mb-0" style="font-size: 18px;">Simulasi Cicilan (Preview)</h3>
+                <span class="chip chip-sm" id="previewBadge" style="font-size: 11px;">Belum Dihitung</span>
             </div>
-            <span asp-validation-for="Amount" class="text-danger text-sm font-bold"></span>
-            <small class="d-block mt-1" style="font-size: 12px; opacity: .75;">Minimal Rp 1.000.000, maksimal Rp 50.000.000</small>
-        </div>
 
-        <div class="mb-4">
-            <label asp-for="TenorMonths" class="form-label"></label>
-            <select asp-for="TenorMonths" class="form-select form-control">
-                <option value="3">3 Bulan</option>
-                <option value="6">6 Bulan</option>
-                <option value="12" selected>12 Bulan (1 Tahun)</option>
-                <option value="24">24 Bulan (2 Tahun)</option>
-                <option value="36">36 Bulan (3 Tahun)</option>
-                <option value="48">48 Bulan (4 Tahun)</option>
-                <option value="60">60 Bulan (5 Tahun)</option>
-            </select>
-            <span asp-validation-for="TenorMonths" class="text-danger text-sm font-bold"></span>
-        </div>
+            <div id="previewEmptyState" class="py-5 text-center">
+                <div style="font-size: 32px; margin-bottom: 8px;">📊</div>
+                <h4 style="font-size: 16px;">Belum Ada Simulasi</h4>
+                <p style="font-size: 13px; opacity: .75;" class="mb-3">
+                    Klik tombol <strong>Hitung</strong> untuk melihat rincian cicilan dan tanggal jatuh tempo tanpa menyimpan ke database.
+                </p>
+                <button type="button" class="btn btn-sm" onclick="$('#btnCalculate').trigger('click');">
+                    Hitung Sekarang
+                </button>
+            </div>
 
-        <div class="d-flex justify-content-end gap-2 pt-3" style="border-top: 2px solid var(--ink);">
-            <a class="btn" asp-action="Index">Batal</a>
-            <button type="submit" class="btn btn-primary">Kirim Pengajuan</button>
+            <div id="previewResult" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center p-3 mb-3" style="background: var(--paper); border: 2px solid var(--ink);">
+                    <div>
+                        <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; opacity: .75;">Estimasi Cicilan / Bulan</div>
+                        <div id="previewMonthlyAmount" style="font-size: 20px; font-weight: 900; color: var(--ink);">Rp 0</div>
+                    </div>
+                    <div class="text-end">
+                        <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; opacity: .75;">Total Tenor</div>
+                        <div id="previewTotalTenor" style="font-size: 18px; font-weight: 800;">12 Bulan</div>
+                    </div>
+                </div>
+
+                <div class="table-wrap" style="max-height: 340px; overflow-y: auto; border: 2px solid var(--ink);">
+                    <table class="table mb-0">
+                        <thead style="position: sticky; top: 0; background: var(--cream); z-index: 1;">
+                            <tr>
+                                <th style="width: 50px;">Ke</th>
+                                <th>Jatuh Tempo</th>
+                                <th class="num">Nominal</th>
+                                <th class="num">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <small class="d-block mt-2 text-muted" style="font-size: 11px;">
+                    * Data simulasi dihitung melalui Stored Procedure Oracle (tidak disimpan ke database sebelum form dikirim).
+                </small>
+            </div>
         </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(function () {
+            function formatRupiah(number) {
+                return 'Rp ' + Number(number).toLocaleString('id-ID');
+            }
+
+            function formatDate(dateStr) {
+                var d = new Date(dateStr);
+                return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+
+            $('#btnCalculate').on('click', function () {
+                var $btn = $(this);
+                var amount = parseFloat($('#inputAmount').val());
+                var tenor = parseInt($('#selectTenor').val(), 10);
+
+                if (!amount || amount < 1000000 || amount > 50000000) {
+                    EC.toast('error', 'Nominal harus antara Rp 1.000.000 dan Rp 50.000.000.', 'Validasi');
+                    $('#inputAmount').focus();
+                    return;
+                }
+
+                if (![6, 12, 24, 36].includes(tenor)) {
+                    EC.toast('error', 'Tenor harus 6, 12, 24, atau 36 bulan.', 'Validasi');
+                    $('#selectTenor').focus();
+                    return;
+                }
+
+                $btn.prop('disabled', true).text('Menghitung...');
+
+                $.ajax({
+                    url: '@Url.Action("PreviewInstallment", "CreditApplications")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ amount: amount, tenorMonths: tenor }),
+                    headers: {
+                        'RequestVerificationToken': EC.token()
+                    },
+                    success: function (res) {
+                        $btn.prop('disabled', false).html('⚙ Hitung');
+
+                        if (res.status && res.data && res.data.length > 0) {
+                            var items = res.data;
+                            var tbody = $('#previewTableBody');
+                            tbody.empty();
+
+                            items.forEach(function (item) {
+                                tbody.append(
+                                    '<tr>' +
+                                    '  <td class="font-bold">#' + item.installmentNo + '</td>' +
+                                    '  <td>' + formatDate(item.dueDate) + '</td>' +
+                                    '  <td class="num font-bold">' + formatRupiah(item.installmentAmount) + '</td>' +
+                                    '  <td class="num"><span class="badge badge-pending" style="font-size: 10px;">' + (item.status || 'UNPAID') + '</span></td>' +
+                                    '</tr>'
+                                );
+                            });
+
+                            var monthly = items[0].installmentAmount;
+                            $('#previewMonthlyAmount').text(formatRupiah(monthly));
+                            $('#previewTotalTenor').text(tenor + ' Bulan');
+                            $('#previewBadge').removeClass('chip-sm').addClass('chip-orange').text(tenor + ' Cicilan');
+
+                            $('#previewEmptyState').hide();
+                            $('#previewResult').fadeIn(200);
+                            EC.toast('success', 'Skema ' + items.length + ' cicilan berhasil dihitung via Oracle SP.', 'Simulasi Selesai');
+                        } else {
+                            EC.toast('error', res.message || 'Gagal menghitung simulasi cicilan.', 'Gagal');
+                        }
+                    },
+                    error: function (xhr) {
+                        $btn.prop('disabled', false).html('⚙ Hitung');
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.';
+                        EC.toast('error', msg, 'Gagal');
+                    }
+                });
+            });
+
+            // Auto calculate jika input berubah dan valid
+            $('#inputAmount, #selectTenor').on('change', function () {
+                var amt = parseFloat($('#inputAmount').val());
+                if (amt >= 1000000 && amt <= 50000000) {
+                    $('#btnCalculate').trigger('click');
+                }
+            });
+
+            // Auto-trigger on page load
+            $('#btnCalculate').trigger('click');
+        });
+    </script>
 }
