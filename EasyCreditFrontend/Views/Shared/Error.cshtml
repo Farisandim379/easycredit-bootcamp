@@ -1,0 +1,23 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="card panel p-5 text-center" style="max-width: 600px; margin: 40px auto;">
+    <div style="font-family: var(--font-display); font-size: 64px; color: var(--orange); line-height: 1;">@Model.StatusCode</div>
+    <h2 class="mt-2 mb-3">Terjadi kesalahan</h2>
+    <p style="opacity: .8;">
+        @(Model.StatusCode == 404
+            ? "Halaman yang Anda minta tidak ditemukan."
+            : "Terjadi kesalahan pada server. Silakan coba lagi nanti.")
+    </p>
+
+    @if (Model.ShowRequestId)
+    {
+        <p class="mono small" style="opacity: .7;">Request ID: <code>@Model.RequestId</code></p>
+    }
+
+    <div class="mt-3">
+        <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Kembali ke Beranda</a>
+    </div>
+</div>

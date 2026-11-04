@@ -1,0 +1,65 @@
+@model CreateApplicationViewModel
+@{
+    ViewData["Title"] = "Ajukan Pinjaman Kredit";
+}
+
+<div class="d-flex flex-column gap-1 mb-4">
+    <div class="crumbs mb-1">
+        <a asp-controller="Home" asp-action="Index">Dashboard</a>
+        <span>/</span>
+        <a asp-action="Index">Pengajuan</a>
+        <span>/</span>
+        <span>Ajukan Pinjaman</span>
+    </div>
+    <h2>Buat Pengajuan Pinjaman</h2>
+    <p class="mb-0" style="opacity: .75; font-size: 13px;">Pilih nasabah dan tentukan nominal serta tenor pinjaman yang diajukan.</p>
+</div>
+
+<div class="card panel p-4" style="max-width: 680px;">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+        <div class="mb-3">
+            <label asp-for="CustomerId" class="form-label"></label>
+            <select asp-for="CustomerId" asp-items="@ViewBag.CustomerList" class="form-select form-control">
+                <option value="">-- Pilih Nasabah --</option>
+            </select>
+            <span asp-validation-for="CustomerId" class="text-danger text-sm font-bold"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Amount" class="form-label"></label>
+            <div class="input-group">
+                <span class="input-group-text">Rp</span>
+                <input asp-for="Amount" type="number" step="500000" class="form-control" placeholder="5000000" />
+            </div>
+            <span asp-validation-for="Amount" class="text-danger text-sm font-bold"></span>
+            <small class="d-block mt-1" style="font-size: 12px; opacity: .75;">Minimal Rp 1.000.000, maksimal Rp 500.000.000</small>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="TenorMonths" class="form-label"></label>
+            <select asp-for="TenorMonths" class="form-select form-control">
+                <option value="3">3 Bulan</option>
+                <option value="6">6 Bulan</option>
+                <option value="12" selected>12 Bulan (1 Tahun)</option>
+                <option value="24">24 Bulan (2 Tahun)</option>
+                <option value="36">36 Bulan (3 Tahun)</option>
+                <option value="48">48 Bulan (4 Tahun)</option>
+                <option value="60">60 Bulan (5 Tahun)</option>
+            </select>
+            <span asp-validation-for="TenorMonths" class="text-danger text-sm font-bold"></span>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3" style="border-top: 2px solid var(--ink);">
+            <a class="btn" asp-action="Index">Batal</a>
+            <button type="submit" class="btn btn-primary">Kirim Pengajuan</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

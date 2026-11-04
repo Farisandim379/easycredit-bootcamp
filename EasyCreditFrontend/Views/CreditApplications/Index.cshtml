@@ -1,0 +1,162 @@
+@model ApplicationIndexViewModel
+@{
+    ViewData["Title"] = "Pengajuan Kredit";
+
+    string StatusBadge(string status) => status switch
+    {
+        "APPROVED" => "badge",
+        "REJECTED" => "badge badge-rejected",
+        _ => "badge badge-pending"
+    };
+}
+
+<div class="card panel">
+    <div class="card-header panel-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h2>Daftar Pengajuan Kredit</h2>
+            <p class="mb-0" style="opacity: .75; font-size: 13px;">Kelola dan setujui permohonan pinjaman nasabah (Oracle Stored Procedure Day 6).</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <span class="chip chip-orange">Menunggu: @Model.Items.Count(i => i.CanApprove)</span>
+            <a class="btn btn-primary" asp-action="Create">+ Ajukan Pinjaman</a>
+        </div>
+    </div>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="p-5 text-center">
+            <div style="font-size: 32px; margin-bottom: 8px;">▤</div>
+            <h4 class="page-title" style="font-size: 20px;">Belum ada pengajuan</h4>
+            <p style="opacity: .75;">Tidak ada data pengajuan kredit yang sesuai filter saat ini.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nasabah</th>
+                        <th class="num">Jumlah Pinjaman</th>
+                        <th>Tenor</th>
+                        <th>Status</th>
+                        <th>Disetujui Oleh</th>
+                        <th>Waktu Persetujuan</th>
+                        <th class="num">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td style="font-weight:700;">#@item.ApplicationId</td>
+                            <td>
+                                <strong>@item.CustomerName</strong>
+                                <small class="d-block" style="font-size: 11px; opacity: .75;">ID: @item.CustomerId</small>
+                            </td>
+                            <td class="num font-bold">
+                                Rp @item.Amount.ToString("N0")
+                            </td>
+                            <td>@item.TenorMonths Bulan</td>
+                            <td>
+                                <span class="@StatusBadge(item.Status)">@item.Status</span>
+                            </td>
+                            <td style="opacity: .8;">@(item.ApprovedBy ?? "-")</td>
+                            <td style="opacity: .8;">@(item.ApprovedAt?.ToString("dd MMM yyyy HH:mm") ?? "-")</td>
+                            <td class="num">
+                                @if (item.CanApprove)
+                                {
+                                    <button type="button"
+                                            class="btn btn-primary btn-sm js-approve"
+                                            data-id="@item.ApplicationId"
+                                            data-name="@item.CustomerName"
+                                            data-amount="Rp @item.Amount.ToString("N0")">
+                                        Setujui
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span style="opacity: .7; font-size: 12px; font-weight: 700;">Selesai</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <span style="opacity: .8;">
+                Menampilkan @Model.Items.Count dari @Model.Total pengajuan
+            </span>
+
+            <div class="d-flex gap-2 align-items-center">
+                <a class="btn btn-sm @(!Model.HasPreviousPage ? "disabled" : "")"
+                   asp-action="Index"
+                   asp-route-page="@(Model.Page - 1)"
+                   asp-route-size="@Model.Size">
+                    Sebelumnya
+                </a>
+
+                <span style="font-weight: 700; padding: 0 4px;">@Model.Page / @Model.TotalPages</span>
+
+                <a class="btn btn-sm @(!Model.HasNextPage ? "disabled" : "")"
+                   asp-action="Index"
+                   asp-route-page="@(Model.Page + 1)"
+                   asp-route-size="@Model.Size">
+                    Berikutnya
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('.js-approve').on('click', async function () {
+                var btn = $(this);
+                var id = btn.data('id');
+                var name = btn.data('name');
+                var amount = btn.data('amount');
+
+                var ok = await EC.confirm({
+                    title: 'Setujui Pengajuan Kredit?',
+                    message: 'Anda akan menyetujui pinjaman ' + amount + ' untuk ' + name + '.',
+                    confirmText: 'Ya, Setujui',
+                    danger: false
+                });
+
+                if (!ok) return;
+
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("Approve", "CreditApplications")',
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        approver: '@ViewBag.UserName',
+                        __RequestVerificationToken: EC.token()
+                    },
+                    success: function (res) {
+                        if (res.status) {
+                            EC.toast('success', res.message, 'Disetujui');
+                            setTimeout(function () {
+                                location.reload();
+                            }, 800);
+                        } else {
+                            btn.prop('disabled', false);
+                            EC.toast('error', res.message, 'Gagal');
+                        }
+                    },
+                    error: function () {
+                        btn.prop('disabled', false);
+                        EC.toast('error', 'Terjadi kesalahan saat memproses approval.', 'Gagal');
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,90 @@
+@EasyCreditApi_HostAddress = http://localhost:5000
+@ApiKey = easycredit_dummy_kxxObJ12OBkUBooOzMEPLZyUfsQn2U2v
+
+### [DAY 4] Login Admin
+# @name loginAdmin
+POST {{EasyCreditApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+X-Api-Key: {{ApiKey}}
+
+{
+  "email": "admin@mail.com",
+  "password": "Admin123!"
+}
+
+### Simpan token dari response login
+@token = {{loginAdmin.response.body.data.accessToken}}
+
+### [DAY 5] Lab: Ping Oracle DB
+GET {{EasyCreditApi_HostAddress}}/_dbping
+X-Api-Key: {{ApiKey}}
+
+### [DAY 5] Lab: Transaction Demo
+POST {{EasyCreditApi_HostAddress}}/_tx-demo?fail=false
+X-Api-Key: {{ApiKey}}
+
+### [DAY 5] Get Customers (Dapper Raw SQL Pagination)
+GET {{EasyCreditApi_HostAddress}}/api/customers?page=1&size=10
+Authorization: Bearer {{token}}
+X-Api-Key: {{ApiKey}}
+
+### [DAY 5] Create Customer (Raw SQL)
+POST {{EasyCreditApi_HostAddress}}/api/customers
+Authorization: Bearer {{token}}
+X-Api-Key: {{ApiKey}}
+Content-Type: application/json
+
+{
+  "name": "Budi Santoso",
+  "nik": "3201012345678901",
+  "phone": "08123456789",
+  "email": "budi.santoso@example.com",
+  "address": "Jl. Merdeka No. 10 Jakarta"
+}
+
+### =====================================================================
+### [DAY 6] STORED PROCEDURE ENDPOINTS (Dapper.Oracle & SYS_REFCURSOR)
+### =====================================================================
+
+### [DAY 6] Get All Customers via Stored Procedure
+GET {{EasyCreditApi_HostAddress}}/api/customers/sp
+Authorization: Bearer {{token}}
+X-Api-Key: {{ApiKey}}
+
+### [DAY 6] Get Customer by ID via Stored Procedure
+GET {{EasyCreditApi_HostAddress}}/api/customers/sp/1
+Authorization: Bearer {{token}}
+X-Api-Key: {{ApiKey}}
+
+### [DAY 6] Create Customer via Stored Procedure
+POST {{EasyCreditApi_HostAddress}}/api/customers/sp
+Authorization: Bearer {{token}}
+X-Api-Key: {{ApiKey}}
+Content-Type: application/json
+
+{
+  "name": "Siti Rahma",
+  "nik": "3201019988770001",
+  "phone": "08198765432",
+  "email": "siti.rahma@example.com",
+  "address": "Jl. Sudirman No. 45 Bandung"
+}
+
+### [DAY 6] Get All Credit Applications via Stored Procedure
+GET {{EasyCreditApi_HostAddress}}/api/credit-applications
+Authorization: Bearer {{token}}
+X-Api-Key: {{ApiKey}}
+
+### [DAY 6] Approve Credit Application via Stored Procedure
+POST {{EasyCreditApi_HostAddress}}/api/credit-applications/1/approve
+Authorization: Bearer {{token}}
+X-Api-Key: {{ApiKey}}
+Content-Type: application/json
+
+{
+  "approver": "Credit Analyst Supervisor"
+}
+
+### [DAY 6] Lab: Reset Application to SUBMITTED (Dev only)
+POST {{EasyCreditApi_HostAddress}}/_reset-app/1
+X-Api-Key: {{ApiKey}}

@@ -1,0 +1,139 @@
+@model CustomerIndexViewModel
+@{
+    ViewData["Title"] = "Customer";
+    var hasKeyword = !string.IsNullOrWhiteSpace(Model.Keyword);
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="crumbs mb-1">
+            <a asp-controller="Home" asp-action="Index">Dashboard</a>
+            <span>/</span>
+            <span>Customer</span>
+        </div>
+        <h2>Master customer</h2>
+        <p class="mb-0" style="opacity: .75; font-size: 13px;">Daftar nasabah, pencarian, dan hapus data via jQuery AJAX tanpa reload halaman.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">+ Tambah customer</a>
+</div>
+
+<form id="customerSearchForm" asp-action="Index" method="get" class="toolbar mb-4">
+    <div class="search-field flex-grow-1">
+        <input id="customerKeyword"
+               name="keyword"
+               value="@Model.Keyword"
+               class="form-control"
+               placeholder="Cari nama, NIK, atau email…"
+               autocomplete="off" />
+    </div>
+
+    <select name="size" class="form-select toolbar-select" aria-label="Jumlah baris" style="width: auto;">
+        @foreach (var size in new[] { 5, 10, 25, 50 })
+        {
+            <option value="@size" selected="@(Model.Size == size)">@size baris</option>
+        }
+    </select>
+
+    <button type="submit" class="btn btn-dark">Cari</button>
+
+    @if (hasKeyword)
+    {
+        <a class="btn" asp-action="Index">Reset</a>
+    }
+</form>
+
+<div id="customerList">
+    <partial name="_CustomerList" model="Model" />
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var searchUrl = '@Url.Action("Rows", "Customers")';
+            var deleteUrl = '@Url.Action("Delete", "Customers")';
+            var defaultPageSize = @Model.Size;
+            var timer = null;
+
+            function currentPageSize() {
+                return $('#customerSearchForm select[name="size"]').val() || defaultPageSize;
+            }
+
+            function loadCustomers(page) {
+                $.ajax({
+                    url: searchUrl,
+                    type: 'GET',
+                    data: {
+                        keyword: $('#customerKeyword').val(),
+                        page: page,
+                        size: currentPageSize()
+                    },
+                    success: function (html) {
+                        $('#customerList').html(html);
+                    },
+                    error: function () {
+                        EC.toast('error', 'Gagal memuat daftar customer.', 'Gagal');
+                    }
+                });
+            }
+
+            $('#customerKeyword').on('input', function () {
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    loadCustomers(1);
+                }, 350);
+            });
+
+            $('#customerSearchForm').on('submit', function (event) {
+                event.preventDefault();
+                loadCustomers(1);
+            });
+
+            $('#customerSearchForm select[name="size"]').on('change', function () {
+                loadCustomers(1);
+            });
+
+            $('#customerList').on('click', '.js-page', function () {
+                loadCustomers($(this).data('page'));
+            });
+
+            $('#customerList').on('click', '.js-delete', async function () {
+                var button = $(this);
+                var id = button.data('id');
+                var name = button.data('name');
+
+                var ok = await EC.confirm({
+                    title: 'Hapus customer?',
+                    message: 'Customer "' + name + '" akan dihapus permanen.',
+                    confirmText: 'Ya, hapus',
+                    danger: true
+                });
+
+                if (!ok) return;
+
+                button.prop('disabled', true);
+
+                $.ajax({
+                    url: deleteUrl,
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        __RequestVerificationToken: EC.token()
+                    },
+                    success: function (response) {
+                        if (response.status) {
+                            EC.toast('success', response.message, 'Berhasil');
+                            loadCustomers(@Model.Page);
+                        } else {
+                            button.prop('disabled', false);
+                            EC.toast('error', response.message, 'Gagal');
+                        }
+                    },
+                    error: function () {
+                        button.prop('disabled', false);
+                        EC.toast('error', 'Tidak dapat menghubungi server.', 'Gagal');
+                    }
+                });
+            });
+        });
+    </script>
+}

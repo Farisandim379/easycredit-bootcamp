@@ -1,0 +1,163 @@
+@using Microsoft.AspNetCore.Http
+@using EasyCreditFrontend.Services
+@{
+    var controller = (string?)ViewContext.RouteData.Values["controller"] ?? string.Empty;
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString(SessionKeys.Token));
+    var userName = Context.Session.GetString(SessionKeys.Name) ?? "User";
+    var role = Context.Session.GetString(SessionKeys.Role) ?? "STAFF";
+    var initial = string.IsNullOrWhiteSpace(userName)
+        ? "U"
+        : userName.Trim().Substring(0, 1).ToUpperInvariant();
+
+    string NavClass(string name) =>
+        string.Equals(controller, name, StringComparison.OrdinalIgnoreCase)
+            ? "nav-link active is-active"
+            : "nav-link";
+}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · EasyCredit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/retro.css" asp-append-version="true" />
+</head>
+<body class="@(isLoggedIn ? string.Empty : "is-auth")">
+    <div class="app-shell">
+        @if (isLoggedIn)
+        {
+            <aside class="sidebar" id="sidebar">
+                <a class="brand" asp-controller="Home" asp-action="Index">
+                    <span class="brand-mark">EC</span>
+                    <span class="brand-text">
+                        <strong>EasyCredit</strong>
+                        <small>MVC Frontend</small>
+                    </span>
+                </a>
+
+                <nav class="sidebar-nav d-flex flex-column gap-2" aria-label="Navigasi utama">
+                    <span class="section-label">Menu</span>
+
+                    <a class="@NavClass("Home")" asp-controller="Home" asp-action="Index">
+                        <span class="nav-icon" style="margin-right:8px;">▦</span>
+                        Dashboard
+                    </a>
+
+                    <a class="@NavClass("Customers")" asp-controller="Customers" asp-action="Index">
+                        <span class="nav-icon" style="margin-right:8px;">◉</span>
+                        Customer
+                    </a>
+
+                    <a class="@NavClass("CreditApplications")" asp-controller="CreditApplications" asp-action="Index">
+                        <span class="nav-icon" style="margin-right:8px;">▤</span>
+                        Pengajuan
+                    </a>
+
+                    <span class="section-label mt-2">Aksi cepat</span>
+
+                    <a class="nav-link" asp-controller="Customers" asp-action="Create">
+                        <span class="nav-icon" style="margin-right:8px;">+</span>
+                        Tambah customer
+                    </a>
+                </nav>
+
+                <div class="sidebar-note">
+                    <strong>EasyCreditFrontend</strong>
+                    <div style="font-size:11px; opacity:.8; margin-top:4px;">ASP.NET Core MVC · Razor · jQuery AJAX · ApiClient</div>
+                </div>
+            </aside>
+        }
+
+        <div class="app-main main">
+            @if (isLoggedIn)
+            {
+                <header class="topbar">
+                    <button type="button" class="btn btn-sm d-lg-none" id="sidebarToggle" aria-label="Buka menu">
+                        ☰
+                    </button>
+
+                    <div class="topbar-title">
+                        <span class="eyebrow">EasyCredit Console</span>
+                        <h1 class="page-title">@ViewData["Title"]</h1>
+                    </div>
+
+                    <div class="actions topbar-actions">
+                        <span class="chip">
+                            ● API + Oracle
+                        </span>
+
+                        <div class="chip chip-orange user-chip">
+                            <span class="avatar">@initial</span>
+                            <span>
+                                <strong>@userName</strong>
+                                <small>(@role)</small>
+                            </span>
+                        </div>
+                        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm">Keluar</button>
+                        </form>
+                    </div>
+                </header>
+            }
+
+            <main class="page-content @(isLoggedIn ? string.Empty : "auth-page")">
+                @if (TempData["Success"] is string success)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" data-alert>
+                        <strong>Berhasil.</strong> @success
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                    </div>
+                }
+
+                @if (TempData["Error"] is string error)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" data-alert>
+                        <strong>Gagal.</strong> @error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+
+            @if (isLoggedIn)
+            {
+                <footer class="footer app-footer">
+                    <span>&copy; @DateTime.Now.Year EasyCredit — Bootcamp .NET Batch 19</span>
+                    <span class="mono ms-2" style="opacity:.75;">MVC Frontend · ApiClient · JWT session</span>
+                </footer>
+            }
+        </div>
+    </div>
+
+    @Html.AntiForgeryToken()
+
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title page-title" id="confirmTitle" style="font-size: 18px;">Konfirmasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body" id="confirmMessage" style="font-size: 15px; font-weight: 500;"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="confirmOk">Ya, lanjutkan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

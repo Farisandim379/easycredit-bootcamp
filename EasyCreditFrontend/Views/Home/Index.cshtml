@@ -1,0 +1,113 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+
+    string StatusBadge(string status) => status switch
+    {
+        "APPROVED" => "badge",
+        "REJECTED" => "badge badge-rejected",
+        _ => "badge badge-pending"
+    };
+}
+
+<div class="card panel p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <span class="eyebrow">Ringkasan operasional</span>
+            <h2 class="mt-1 mb-2">Selamat datang, @ViewBag.UserName.</h2>
+            <p class="mb-0" style="max-width: 680px; opacity: .85;">
+                Halaman ini dirender oleh <strong>Razor View Engine</strong> dan mengambil data
+                lewat <strong>ApiClient</strong> ke EasyCredit API. Interaksi tabel memakai jQuery AJAX
+                ke controller MVC frontend.
+            </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn" asp-controller="Customers" asp-action="Index">
+                Kelola customer
+            </a>
+            <a class="btn btn-primary" asp-controller="CreditApplications" asp-action="Index">
+                Lihat pengajuan
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="stat-grid mb-4">
+    <div class="card stat-card">
+        <span class="stat-label">Total customer</span>
+        <strong class="stat-value">@Model.TotalCustomers</strong>
+        <span class="stat-sub">Tabel customer</span>
+    </div>
+    <div class="card stat-card">
+        <span class="stat-label">Total pengajuan</span>
+        <strong class="stat-value">@Model.TotalApplications</strong>
+        <span class="stat-sub">Header aplikasi kredit</span>
+    </div>
+    <div class="card stat-card">
+        <span class="stat-label">Menunggu approval</span>
+        <strong class="stat-value">@Model.Pending</strong>
+        <span class="stat-sub">Status SUBMITTED</span>
+    </div>
+    <div class="card stat-card">
+        <span class="stat-label">Disetujui</span>
+        <strong class="stat-value">@Model.Approved</strong>
+        <span class="stat-sub">@Model.Rejected ditolak</span>
+    </div>
+</div>
+
+<div class="card panel">
+    <div class="card-header panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h3 style="font-size: 20px;">Pengajuan terbaru</h3>
+            <span class="eyebrow" style="opacity: .75; font-size: 11px;">5 pengajuan terakhir dari stored procedure Day 6.</span>
+        </div>
+        <a class="btn btn-sm" asp-controller="CreditApplications" asp-action="Index">
+            Lihat semua
+        </a>
+    </div>
+
+    @if (!Model.Recent.Any())
+    {
+        <div class="p-5 text-center">
+            <div style="font-size: 32px; margin-bottom: 8px;">▤</div>
+            <h4 class="page-title" style="font-size: 20px;">Belum ada pengajuan</h4>
+            <p style="opacity: .75;">Data pengajuan akan muncul di sini setelah ada record di Oracle.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th class="num">Pinjaman</th>
+                        <th>Tenor</th>
+                        <th>Status</th>
+                        <th>Approver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Recent)
+                    {
+                        var custInitial = string.IsNullOrWhiteSpace(item.CustomerName)
+                            ? "C"
+                            : item.CustomerName.Trim().Substring(0, 1).ToUpperInvariant();
+                        <tr>
+                            <td style="font-weight:700;">#@item.ApplicationId</td>
+                            <td>
+                                <span class="avatar">@custInitial</span>
+                                <strong>@item.CustomerName</strong>
+                            </td>
+                            <td class="num font-bold">Rp @item.Amount.ToString("N0")</td>
+                            <td>@item.TenorMonths bulan</td>
+                            <td><span class="@StatusBadge(item.Status)">@item.Status</span></td>
+                            <td style="opacity: .8;">@(item.ApprovedBy ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

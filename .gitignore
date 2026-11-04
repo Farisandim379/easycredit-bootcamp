@@ -1,14 +1,25 @@
-# Secret lokal — JANGAN pernah di-commit
-appsettings.Local.json
+## .NET Core
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
-# Build output
-bin/
-obj/
-Logs/
-appsettings.json
-docs/Materi-Dapper-Oracle.md
-docs/Materi-Day6-StoredProcedure.md
-scripts/oracle/day6_reset_application.sql
-scripts/oracle/day6_stored_procedures.sql
-scripts/smoke-test-day6.sh
-scripts/smoke-test.sh
+## Visual Studio / VS Code
+.vs/
+.vscode/
+.zed/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Local configuration / Secrets
+appsettings.Local.json
+appsettings.Development.json
+*.local.json
+
+## OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
