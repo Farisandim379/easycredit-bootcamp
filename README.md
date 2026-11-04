@@ -143,5 +143,5 @@ Semua response API dibungkus format seragam `ApiResponse<T>`:
 - [x] **Approve kedua kali ditolak** dengan HTTP 400 (`out_mess` Oracle).
 - [x] **STAFF tidak bisa approve** (HTTP 403 Forbidden).
 - [x] **Akses halaman tanpa login** langsung di-redirect ke `/Auth/Login`.
-- [x] **Swagger & Scalar API Documentation** interaktif lengkap dengan pengisian `X-Api-Key` dan `Bearer JWT`.
+- [x] **Scalar API Documentation** interaktif lengkap dengan pengisian `X-Api-Key` dan `Bearer JWT`.
 - [x] **README** lengkap dan dapat diikuti dari nol.

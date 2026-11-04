@@ -35,15 +35,6 @@ builder.Host.UseSerilog((ctx, services, cfg) => cfg
     .ReadFrom.Services(services));
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
-    {
-        Title = "EasyCredit API",
-        Version = "v1",
-        Description = "EasyCredit Sistem Pengajuan Kredit Online — ASP.NET Core Web API"
-    });
-});
 
 /// JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
@@ -146,9 +137,6 @@ if (app.Environment.IsDevelopment())
     {
         options.WithTitle("EasyCredit API Documentation");
     });
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
     // Endpoint lab: hanya aktif di Development.
     app.MapGet("/_dbping", async (OracleConnectionFactory factory) =>
     {
