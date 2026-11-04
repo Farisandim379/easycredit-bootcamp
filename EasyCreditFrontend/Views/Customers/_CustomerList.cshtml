@@ -41,7 +41,7 @@ else
                             <td style="opacity: .8;">@(string.IsNullOrWhiteSpace(item.Email) ? "—" : item.Email)</td>
                             <td class="num">
                                 <div class="d-inline-flex gap-2">
-                                    <a class="btn btn-sm" asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a>
+                                    <a class="btn btn-sm btn-action" asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a>
                                     <button type="button"
                                             class="btn btn-danger btn-sm js-delete"
                                             data-id="@item.CustomerId"
@@ -63,7 +63,7 @@ else
 
             <div class="d-flex gap-2 align-items-center">
                 <button type="button"
-                        class="btn btn-sm js-page"
+                        class="btn btn-sm btn-action js-page"
                         data-page="@(Model.Page - 1)"
                         disabled="@(!Model.HasPreviousPage)">
                     Sebelumnya
@@ -72,7 +72,7 @@ else
                 <span style="font-weight: 700; padding: 0 4px;">@Model.Page / @Model.TotalPages</span>
 
                 <button type="button"
-                        class="btn btn-sm js-page"
+                        class="btn btn-sm btn-action js-page"
                         data-page="@(Model.Page + 1)"
                         disabled="@(!Model.HasNextPage)">
                     Berikutnya
