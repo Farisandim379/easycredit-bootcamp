@@ -27,7 +27,7 @@
                autocomplete="off" />
     </div>
 
-    <select name="size" class="form-select toolbar-select" aria-label="Jumlah baris" style="width: auto;">
+    <select name="size" class="form-select toolbar-select" aria-label="Jumlah baris">
         @foreach (var size in new[] { 5, 10, 25, 50 })
         {
             <option value="@size" selected="@(Model.Size == size)">@size baris</option>

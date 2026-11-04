@@ -24,29 +24,26 @@
 
     <!-- Filter & Search Bar -->
     <div class="p-3" style="background: var(--paper); border-bottom: 3px solid var(--ink);">
-        <form method="get" asp-action="Index" class="d-flex flex-wrap align-items-center gap-2">
-            <div class="flex-grow-1" style="min-width: 250px;">
+        <form method="get" asp-action="Index" class="toolbar m-0">
+            <div class="search-field flex-grow-1">
                 <input type="text"
                        name="keyword"
                        value="@Model.Keyword"
                        class="form-control"
-                       placeholder="Cari nama nasabah atau ID pengajuan..."
-                       style="height: 42px; font-weight: 500;" />
+                       placeholder="Cari nama nasabah atau ID pengajuan..." />
             </div>
-            <div style="min-width: 180px;">
-                <select name="status" class="form-select form-control" style="height: 42px; font-weight: 600;">
-                    <option value="">-- Semua Status --</option>
-                    <option value="PENDING" selected="@(Model.Status == "PENDING")">● PENDING</option>
-                    <option value="APPROVED" selected="@(Model.Status == "APPROVED")">✓ APPROVED</option>
-                    <option value="REJECTED" selected="@(Model.Status == "REJECTED")">✕ REJECTED</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-dark" style="height: 42px; padding: 0 20px; display: inline-flex; align-items: center; gap: 6px;">
-                <span>Filter</span>
+            <select name="status" class="form-select toolbar-status" aria-label="Filter status">
+                <option value="">-- Semua Status --</option>
+                <option value="PENDING" selected="@(Model.Status == "PENDING")">● PENDING</option>
+                <option value="APPROVED" selected="@(Model.Status == "APPROVED")">✓ APPROVED</option>
+                <option value="REJECTED" selected="@(Model.Status == "REJECTED")">✕ REJECTED</option>
+            </select>
+            <button type="submit" class="btn btn-dark">
+                Filter
             </button>
             @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.Status))
             {
-                <a asp-action="Index" class="btn btn-action" style="height: 42px; padding: 0 16px; display: inline-flex; align-items: center;">
+                <a asp-action="Index" class="btn btn-action">
                     Reset
                 </a>
             }
