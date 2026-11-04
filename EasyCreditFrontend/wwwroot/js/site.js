@@ -79,3 +79,45 @@ window.EC = {
         }, 3500);
     }
 };
+
+// Sidebar drawer toggle functionality for mobile
+$(function () {
+    function openSidebar() {
+        $('#sidebar').addClass('is-open');
+        $('#sidebarBackdrop').addClass('is-active');
+        $('body').addClass('sidebar-open');
+    }
+
+    function closeSidebar() {
+        $('#sidebar').removeClass('is-open');
+        $('#sidebarBackdrop').removeClass('is-active');
+        $('body').removeClass('sidebar-open');
+    }
+
+    $(document).on('click', '#sidebarToggle', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if ($('#sidebar').hasClass('is-open')) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
+
+    $(document).on('click', '#sidebarClose, #sidebarBackdrop', function (e) {
+        e.preventDefault();
+        closeSidebar();
+    });
+
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape' && $('#sidebar').hasClass('is-open')) {
+            closeSidebar();
+        }
+    });
+
+    $(document).on('click', '#sidebar .sidebar-nav a', function () {
+        if (window.innerWidth <= 992) {
+            closeSidebar();
+        }
+    });
+});

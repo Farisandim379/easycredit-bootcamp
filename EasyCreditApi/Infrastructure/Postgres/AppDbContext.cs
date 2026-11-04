@@ -2,7 +2,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using EasyCreditApi.Domain.Entities;
 
-
 namespace EasyCreditApi.Infrastructure.Postgres;
 
 public class AppDbContext : DbContext
@@ -25,7 +24,11 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(100).IsRequired();
             entity.Property(e => e.PasswordHash).HasColumnName("password_hash").HasMaxLength(255).IsRequired();
             entity.Property(e => e.Role).HasColumnName("role").HasMaxLength(20).IsRequired();
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .HasConversion(
+                    v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
             entity.HasIndex(e => e.Email).IsUnique();
         });
 
@@ -39,9 +42,12 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Phone).HasColumnName("phone").HasMaxLength(20);
             entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(100);
             entity.Property(e => e.Address).HasColumnName("address").HasMaxLength(255);
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .HasConversion(
+                    v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
             entity.HasIndex(e => e.Nik).IsUnique();
         });
     }
-
 }

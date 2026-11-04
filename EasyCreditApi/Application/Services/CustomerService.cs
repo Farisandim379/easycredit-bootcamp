@@ -36,7 +36,8 @@ public sealed class CustomerService : ICustomerService
             Nik = nik,
             Phone = dto.Phone,
             Email = dto.Email,
-            Address = dto.Address
+            Address = dto.Address,
+            CreatedAt = DateTime.UtcNow
         };
 
         try

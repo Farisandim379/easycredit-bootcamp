@@ -23,26 +23,30 @@
     </div>
 
     <!-- Filter & Search Bar -->
-    <div class="p-3" style="background: var(--paper); border-bottom: 2px solid var(--ink);">
-        <form method="get" asp-action="Index" class="row g-2 align-items-center">
-            <div class="col-12 col-md-5">
-                <input type="text" name="keyword" value="@Model.Keyword" class="form-control" placeholder="Cari nama nasabah atau ID pengajuan..." />
+    <div class="p-3" style="background: var(--paper); border-bottom: 3px solid var(--ink);">
+        <form method="get" asp-action="Index" class="toolbar m-0">
+            <div class="search-field flex-grow-1">
+                <input type="text"
+                       name="keyword"
+                       value="@Model.Keyword"
+                       class="form-control"
+                       placeholder="Cari nama nasabah atau ID pengajuan..." />
             </div>
-            <div class="col-6 col-md-3">
-                <select name="status" class="form-select form-control">
-                    <option value="">-- Semua Status --</option>
-                    <option value="PENDING" selected="@(Model.Status == "PENDING")">PENDING</option>
-                    <option value="APPROVED" selected="@(Model.Status == "APPROVED")">APPROVED</option>
-                    <option value="REJECTED" selected="@(Model.Status == "REJECTED")">REJECTED</option>
-                </select>
-            </div>
-            <div class="col-6 col-md-4 d-flex gap-2">
-                <button type="submit" class="btn btn-sm" style="flex: 1;">Filter</button>
-                @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.Status))
-                {
-                    <a asp-action="Index" class="btn btn-sm" style="background: var(--cream);">Reset</a>
-                }
-            </div>
+            <select name="status" class="form-select toolbar-status" aria-label="Filter status">
+                <option value="">-- Semua Status --</option>
+                <option value="PENDING" selected="@(Model.Status == "PENDING")">● PENDING</option>
+                <option value="APPROVED" selected="@(Model.Status == "APPROVED")">✓ APPROVED</option>
+                <option value="REJECTED" selected="@(Model.Status == "REJECTED")">✕ REJECTED</option>
+            </select>
+            <button type="submit" class="btn btn-dark">
+                Filter
+            </button>
+            @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.Status))
+            {
+                <a asp-action="Index" class="btn btn-action">
+                    Reset
+                </a>
+            }
         </form>
     </div>
 
@@ -89,8 +93,8 @@
                             <td style="opacity: .8;">@(item.ApprovedBy ?? "-")</td>
                             <td style="opacity: .8;">@(item.ApprovedAt?.ToString("dd MMM yyyy HH:mm") ?? "-")</td>
                             <td class="num">
-                                <div class="d-inline-flex gap-1 align-items-center">
-                                    <a asp-action="Detail" asp-route-id="@item.ApplicationId" class="btn btn-sm" style="padding: 4px 8px; font-size: 11px;">
+                                <div class="d-inline-flex gap-2 align-items-center">
+                                    <a asp-action="Detail" asp-route-id="@item.ApplicationId" class="btn btn-sm btn-action">
                                         Detail
                                     </a>
 
@@ -134,7 +138,7 @@
             </span>
 
             <div class="d-flex gap-2 align-items-center">
-                <a class="btn btn-sm @(!Model.HasPreviousPage ? "disabled" : "")"
+                <a class="btn btn-sm btn-action @(!Model.HasPreviousPage ? "disabled" : "")"
                    asp-action="Index"
                    asp-route-page="@(Model.Page - 1)"
                    asp-route-size="@Model.Size"
@@ -145,7 +149,7 @@
 
                 <span style="font-weight: 700; padding: 0 4px;">@Model.Page / @Model.TotalPages</span>
 
-                <a class="btn btn-sm @(!Model.HasNextPage ? "disabled" : "")"
+                <a class="btn btn-sm btn-action @(!Model.HasNextPage ? "disabled" : "")"
                    asp-action="Index"
                    asp-route-page="@(Model.Page + 1)"
                    asp-route-size="@Model.Size"

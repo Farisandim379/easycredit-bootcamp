@@ -37,11 +37,29 @@
                 <div class="mb-3">
                     <label asp-for="Amount" class="form-label font-bold"></label>
                     <div class="input-group">
-                        <span class="input-group-text">Rp</span>
-                        <input asp-for="Amount" id="inputAmount" type="number" step="500000" min="1000000" max="50000000" class="form-control" placeholder="5000000" />
+                        <span class="input-group-text font-bold">Rp</span>
+                        <input type="text"
+                               id="displayAmount"
+                               class="form-control font-bold"
+                               placeholder="50.000.000"
+                               autocomplete="off"
+                               inputmode="numeric"
+                               style="font-size: 16px;" />
+                        <input type="hidden" asp-for="Amount" id="inputAmount" />
                     </div>
-                    <span asp-validation-for="Amount" class="text-danger text-sm font-bold"></span>
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mt-2 gap-1">
+                        <div class="d-flex gap-1 flex-wrap">
+                            <button type="button" class="btn btn-sm js-quick-amount" data-amount="5000000" style="padding: 2px 8px; font-size: 11px;">5 Juta</button>
+                            <button type="button" class="btn btn-sm js-quick-amount" data-amount="10000000" style="padding: 2px 8px; font-size: 11px;">10 Juta</button>
+                            <button type="button" class="btn btn-sm js-quick-amount" data-amount="25000000" style="padding: 2px 8px; font-size: 11px;">25 Juta</button>
+                            <button type="button" class="btn btn-sm js-quick-amount" data-amount="50000000" style="padding: 2px 8px; font-size: 11px; background: var(--orange); color: var(--cream);">50 Juta (Maks)</button>
+                        </div>
+                        <span id="amountInWords" class="chip chip-sm" style="font-size: 11px;">Rp 50.000.000</span>
+                    </div>
+
                     <small class="d-block mt-1" style="font-size: 12px; opacity: .75;">Batas pinjaman: Rp 1.000.000 s/d Rp 50.000.000</small>
+                    <span asp-validation-for="Amount" class="text-danger text-sm font-bold d-block mt-1"></span>
                 </div>
 
                 <div class="mb-4">
@@ -53,7 +71,7 @@
                             <option value="24">24 Bulan (2 Tahun)</option>
                             <option value="36">36 Bulan (3 Tahun)</option>
                         </select>
-                        <button type="button" id="btnCalculate" class="btn text-nowrap" style="background: var(--paper); border: 2px solid var(--ink);">
+                        <button type="button" id="btnCalculate" class="btn btn-action text-nowrap">
                             ⚙ Hitung
                         </button>
                     </div>
@@ -61,7 +79,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center gap-2 pt-3" style="border-top: 2px solid var(--ink);">
-                    <a class="btn" asp-action="Index">Batal</a>
+                    <a class="btn btn-action" asp-action="Index">Batal</a>
                     <button type="submit" id="btnSubmit" class="btn btn-primary">
                         Ajukan Pinjaman
                     </button>
@@ -137,6 +155,61 @@
                 return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
             }
 
+            function updateAmount(val) {
+                var rawDigits = String(val).replace(/\D/g, '');
+                var num = rawDigits ? parseInt(rawDigits, 10) : 0;
+
+                $('#inputAmount').val(num > 0 ? num : '');
+
+                if (num > 0) {
+                    $('#displayAmount').val(Number(num).toLocaleString('id-ID'));
+                    $('#amountInWords').show();
+
+                    if (num > 50000000) {
+                        $('#amountInWords')
+                            .removeClass('chip-sm')
+                            .addClass('badge badge-rejected')
+                            .text('Maksimal Rp 50.000.000');
+                    } else if (num < 1000000) {
+                        $('#amountInWords')
+                            .removeClass('chip-sm')
+                            .addClass('badge badge-rejected')
+                            .text('Minimal Rp 1.000.000');
+                    } else {
+                        $('#amountInWords')
+                            .removeClass('badge badge-rejected')
+                            .addClass('chip chip-sm')
+                            .text(formatRupiah(num));
+                    }
+                } else {
+                    $('#displayAmount').val('');
+                    $('#amountInWords').hide();
+                }
+            }
+
+            // Real-time formatting as user types
+            $('#displayAmount').on('input', function () {
+                var raw = $(this).val();
+                updateAmount(raw);
+
+                var num = parseInt(String(raw).replace(/\D/g, ''), 10);
+                if (num >= 1000000 && num <= 50000000) {
+                    $('#btnCalculate').trigger('click');
+                }
+            });
+
+            // Quick preset chips (5 Juta, 10 Juta, 25 Juta, 50 Juta)
+            $('.js-quick-amount').on('click', function () {
+                var amt = $(this).data('amount');
+                updateAmount(amt);
+                $('#btnCalculate').trigger('click');
+            });
+
+            // Tenor change auto-trigger
+            $('#selectTenor').on('change', function () {
+                $('#btnCalculate').trigger('click');
+            });
+
             $('#btnCalculate').on('click', function () {
                 var $btn = $(this);
                 var amount = parseFloat($('#inputAmount').val());
@@ -144,7 +217,7 @@
 
                 if (!amount || amount < 1000000 || amount > 50000000) {
                     EC.toast('error', 'Nominal harus antara Rp 1.000.000 dan Rp 50.000.000.', 'Validasi');
-                    $('#inputAmount').focus();
+                    $('#displayAmount').focus();
                     return;
                 }
 
@@ -190,7 +263,6 @@
 
                             $('#previewEmptyState').hide();
                             $('#previewResult').fadeIn(200);
-                            EC.toast('success', 'Skema ' + items.length + ' cicilan berhasil dihitung via Oracle SP.', 'Simulasi Selesai');
                         } else {
                             EC.toast('error', res.message || 'Gagal menghitung simulasi cicilan.', 'Gagal');
                         }
@@ -203,15 +275,9 @@
                 });
             });
 
-            // Auto calculate jika input berubah dan valid
-            $('#inputAmount, #selectTenor').on('change', function () {
-                var amt = parseFloat($('#inputAmount').val());
-                if (amt >= 1000000 && amt <= 50000000) {
-                    $('#btnCalculate').trigger('click');
-                }
-            });
-
-            // Auto-trigger on page load
+            // Initialize on page load with 50.000.000
+            var initialAmt = $('#inputAmount').val() || 50000000;
+            updateAmount(initialAmt);
             $('#btnCalculate').trigger('click');
         });
     </script>
