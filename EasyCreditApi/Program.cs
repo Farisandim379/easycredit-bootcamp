@@ -18,6 +18,9 @@ using Microsoft.AspNetCore.Identity;
 using EasyCreditApi.Interfaces.Postgres;
 using Scalar.AspNetCore;
 
+// Npgsql / PostgreSQL DateTime UTC handling
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Secret lokal (connection string, API key, JWT key) â€” file ini di-gitignore.
